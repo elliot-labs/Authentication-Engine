@@ -1,3 +1,4 @@
+import './expressExtension.js';
 import type { NextFunction, Request, Response } from 'express';
 import { AuthenticationEngine } from '../Authentication.js';
 

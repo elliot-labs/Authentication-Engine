@@ -52,8 +52,7 @@
     },
     "include": [
         "src/**/*",
-        "test/**/*",
-        "index.d.ts"
+        "test/**/*"
     ],
     "exclude": [
         "bin/**/*",
