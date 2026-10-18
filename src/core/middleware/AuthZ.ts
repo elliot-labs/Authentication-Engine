@@ -1,6 +1,5 @@
 import type { NextFunction, Request, Response } from 'express';
 import { AuthenticationEngine } from '../Authentication.js';
-import { NULL_UUID } from '../../utility/constants/core.js';
 
 /** Instance of the authentication engine used for validating tokens. */
 const authEngine = AuthenticationEngine.getInstance();
@@ -16,34 +15,7 @@ export function extractAuthZ(request: Request, response: Response, next: NextFun
     /** Authorization header extracted from the request, to be validated. */
     const authorizationHeader = request.get('Authorization');
 
-    // If in debug mode and no token is provided, use a dummy AuthZ payload to allow for development and testing without needing a valid access token
-    if (!authorizationHeader) {
-        /*
-         * Set dummy data on the request for development and testing purposes when in debug mode.
-         *
-         * Value reference:
-         * Entra role list is hard coded to Global Admin.
-         * Object ID is dummy value.
-         * Permissions list is hard coded to all permissions.
-         * Subject ID is a dummy value.
-         * Tenant ID is always the null UUID.
-         */
-        request.bearerAuthorizationData = {
-            'entraRoleList': ['62e90394-69f5-4237-9190-012177145e10'],
-            'objectId': '926f4018-ecb5-4f87-966e-0e76704d1791',
-            'permissionList': ['Everything.ReadWrite.All'],
-            'subjectId': 't1jE7aqxPF4k1nEBnmpHC5zaJpQpbz',
-            'tenantId': NULL_UUID
-        };
-
-        // Pass execution to the next middleware in the stack
-        next();
-
-        // Stop execution to prevent fallthrough
-        return;
-    }
-
-    // Check if the authorization header is not present
+    // Check if the authorization header is not the expected format
     if (typeof authorizationHeader !== 'string') {
         // Indicate the end user is not authenticated
         response.status(401);
