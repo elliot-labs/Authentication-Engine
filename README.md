@@ -1,5 +1,7 @@
 # Authentication Engine
 
+![NPM Version](https://img.shields.io/npm/v/%40elliot-labs%2Fauthentication-engine) ![GitHub License](https://img.shields.io/github/license/elliot-labs/Authentication-Engine)
+
 Microsoft Entra ID authentication and authorization utilities for TypeScript services and Express APIs.
 
 `@elliot-labs/authentication-engine` provides both sides of service authentication:
