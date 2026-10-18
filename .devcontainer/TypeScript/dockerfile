@@ -1,0 +1,23 @@
+# Ensure the 1Password CLI is available in the container
+FROM 1password/op:latest AS op
+
+# Ensure the Node.JS runtime is available in the dev container
+FROM mcr.microsoft.com/devcontainers/typescript-node:24
+
+# Ensure the 1Password CLI is available in the container
+COPY --from=op /usr/local/bin/op /usr/local/bin/op
+
+# Update NPM to the latest version to ensure we have access to the latest features and bug fixes
+RUN sudo npm install -g npm
+
+# Remove packages and tools that are provided by the repo and should not be global
+RUN sudo npm uninstall -g eslint pnpm tslint-to-eslint-config typescript
+
+# Install Socket Firewall, NCU, and socket CLI tools globally in the container.
+RUN sudo npm install -g socket sfw npm-check-updates
+
+# Ensure the binary is installed locally so that the CLI can be used as expected in the container
+RUN sfw
+
+# Expose the user of the container as "node" to avoid running as root
+USER node

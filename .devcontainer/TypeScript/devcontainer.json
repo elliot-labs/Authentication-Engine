@@ -1,0 +1,28 @@
+{
+    "name": "Node.JS - TypeScript",
+    "build": {
+        "dockerfile": "dockerfile"
+    },
+    "customizations": {
+        "vscode": {
+            "settings": {
+                "terminal.integrated.defaultProfile.linux": "bash"
+            },
+            "extensions": [
+                "Azurite.azurite",
+                "streetsidesoftware.code-spell-checker",
+                "MS-CST-E.vscode-devskim",
+                "dbaeumer.vscode-eslint",
+                "github.vscode-github-actions",
+                "PKief.material-icon-theme",
+                "SocketSecurity.vscode-socket-security",
+                "Gruntfuggly.todo-tree"
+            ]
+        }
+    },
+    "forwardPorts": [
+        2000
+    ],
+    "remoteUser": "node",
+    "postCreateCommand": "sfw npm install"
+}
