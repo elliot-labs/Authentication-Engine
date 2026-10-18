@@ -63,7 +63,7 @@
     },
     "dependencies": {
         "@azure/identity": "~4.14.0",
-        "typia": "~12.1.1"
+        "typia": "~15.1.0"
     },
     "overrides": {
         "es-define-property": "npm:@socketregistry/es-define-property@^1",
