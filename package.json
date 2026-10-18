@@ -67,7 +67,7 @@
         "@types/express": "~5.0.6",
         "@types/jws": "~3.2.11",
         "ts-patch": "~4.0.1",
-        "typescript": "~6.0.3"
+        "typescript": "~7.0.2"
     },
     "peerDependencies": {
         "express": "^5.3.0"
