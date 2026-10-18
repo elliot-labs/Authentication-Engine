@@ -106,7 +106,7 @@ export class AuthenticationEngine {
      * const authz = authEngine.getAccessTokenAuthzData(bearerToken);
      * console.log(`Authenticated subject ${ authz.subjectId } from tenant ${ authz.tenantId }`);
      */
-    public async confirmAccessToken(accessToken: string, clientIdList: Uuid[], tenantIdList: Uuid[]): Promise<boolean> {
+    public async confirmAccessToken(accessToken: string, clientIdList: Uuid[] & tags.MinItems<1>, tenantIdList: Uuid[]): Promise<boolean> {
         // #region Input Validation
 
         // If any input validation fails, return false instead of throwing

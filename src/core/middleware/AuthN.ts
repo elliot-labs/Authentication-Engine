@@ -1,7 +1,7 @@
 import type { NextFunction, Request, Response } from 'express';
+import { assertGuardEquals, type tags } from 'typia';
 import { AuthenticationEngine } from '../Authentication.js';
 import type { Uuid } from '../../utility/types/constant/typia.js';
-import { assertGuardEquals } from 'typia';
 
 /** Instance of the authentication engine used for validating tokens. */
 const authEngine = AuthenticationEngine.getInstance();
@@ -16,7 +16,7 @@ const authEngine = AuthenticationEngine.getInstance();
  * @param audienceList List of audience UUIDs that are allowed to access the resource.
  * @returns An Express middleware function that validates the authentication of incoming requests.
  */
-export function newAuthenticationMiddleware(tenantList: Uuid[], audienceList: Uuid[]): (request: Request, response: Response, next: NextFunction) => Promise<void> {
+export function newAuthenticationMiddleware(tenantList: Uuid[], audienceList: Uuid[] & tags.MinItems<1>): (request: Request, response: Response, next: NextFunction) => Promise<void> {
     // #region Input Validation
     assertGuardEquals(tenantList);
 
