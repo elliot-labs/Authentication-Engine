@@ -1,0 +1,27 @@
+{
+    "servers": {
+        "ESLint": {
+            "type": "stdio",
+            "command": "npx",
+            "args": [
+                "@eslint/mcp@latest"
+            ]
+        },
+        "socket-mcp": {
+            "type": "http",
+            "url": "https://mcp.socket.dev/"
+        },
+        "microsoft-learn": {
+            "type": "http",
+            "url": "https://learn.microsoft.com/api/mcp"
+        },
+        "MDN": {
+            "url": "https://mcp.mdn.mozilla.net",
+            "type": "http"
+        },
+        "github": {
+            "type": "http",
+            "url": "https://api.githubcopilot.com/mcp/"
+        }
+    }
+}
