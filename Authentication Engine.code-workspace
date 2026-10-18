@@ -1,0 +1,65 @@
+{
+    "folders": [
+        {
+            "name": "Auth Engine",
+            "path": "."
+        }
+    ],
+    "settings": {
+        "azurite.disableTelemetry": true,
+        "azurite.location": "Azurite",
+        "cSpell.enabledFileTypes": {
+            "*": true
+        },
+        "editor.formatOnSave": true,
+        "editor.detectIndentation": false,
+        "editor.tabSize": 4,
+        "eslint.rules.customizations": [
+            {
+                "rule": "*",
+                "severity": "warn"
+            }
+        ],
+        "files.exclude": {
+            "node_modules": true
+        },
+        "files.insertFinalNewline": true,
+        "files.trimFinalNewlines": true,
+        "js/ts.format.insertSpaceAfterFunctionKeywordForAnonymousFunctions": true,
+        "js/ts.format.insertSpaceAfterOpeningAndBeforeClosingTemplateStringBraces": true,
+        "js/ts.format.insertSpaceAfterOpeningAndBeforeClosingNonemptyParenthesis": false,
+        "js/ts.format.insertSpaceAfterOpeningAndBeforeClosingJsxExpressionBraces": true,
+        "js/ts.format.insertSpaceAfterOpeningAndBeforeClosingNonemptyBrackets": false,
+        "js/ts.format.insertSpaceAfterTypeAssertion": true,
+        "js/ts.format.insertSpaceBeforeFunctionParenthesis": false,
+        "js/ts.format.semicolons": "insert",
+        "js/ts.implementationsCodeLens.enabled": true,
+        "js/ts.implicitProjectConfig.checkJs": true,
+        "js/ts.implicitProjectConfig.target": "ES2024",
+        "js/ts.inlayHints.enumMemberValues.enabled": true,
+        "js/ts.preferences.quoteStyle": "single",
+        "js/ts.tsdk.path": "node_modules\\typescript\\lib",
+		"js/ts.preferences.includePackageJsonAutoImports": "off"
+        "search.exclude": {
+            "**/*.js": true,
+            "**/*.js.map": true
+        },
+        "window.border": "#8A14FF",
+        "workbench.iconTheme": "material-icon-theme",
+        "cSpell.words": [
+            "Typia"
+        ]
+    },
+    "extensions": {
+        "recommendations": [
+            "Azurite.azurite",
+            "streetsidesoftware.code-spell-checker",
+            "MS-CST-E.vscode-devskim",
+            "dbaeumer.vscode-eslint",
+            "github.vscode-github-actions",
+            "PKief.material-icon-theme",
+            "SocketSecurity.vscode-socket-security",
+            "FanaticPythoner.better-todo-tree"
+        ]
+    }
+}

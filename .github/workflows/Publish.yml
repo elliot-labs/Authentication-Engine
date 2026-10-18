@@ -1,0 +1,110 @@
+# Human friendly display name for this workflow
+name: NPM - Publish
+
+# Event listeners for when the job should start execution
+on:
+    # Only when a release is published, which is the only time that the NPM package should be published to the NPM global registry.
+    release:
+        types: [published]
+
+# Isolated execution environments to run steps in
+jobs:
+    # Collect and compute workflow specific information and metadata that will be used by downstream jobs.
+    Initialize-Metadata:
+        # Human friendly display name for this job
+        name: Initialize - Metadata
+
+        # Least permissions required for the job to run successfully
+        permissions:
+            contents: read
+
+        # Run the specified workflow
+        uses: ./.github/workflows/Metadata.yml
+
+    # Build the production artifacts for this project
+    Build:
+        # Human friendly display name for this job
+        name: Build - Production
+
+        # Least permissions required for the job to run successfully
+        permissions:
+            attestations: write
+            contents: read
+            id-token: write
+            packages: write
+
+        # Run the specified workflow
+        uses: ./.github/workflows/Build.yml
+
+    # Upload the artifact to the NPM Global Registry
+    Publish-NPM:
+        # Human friendly display name for this job
+        name: Publish - NPM Global
+
+        # Operating system to run the job on
+        runs-on: ubuntu-slim
+
+        # Wait for the specified jobs to complete before starting this job
+        needs: [Initialize-Metadata, Build]
+
+        # Approval gated execution context to ensure that the NPM package is only published after a human has reviewed and approved the release.
+        environment: NPM
+
+        # Least permissions required for the job to run successfully
+        permissions:
+            attestations: read
+            contents: none
+            id-token: write
+
+        # Sequence of actions to take to accomplish the job
+        steps:
+            # Set up the Node.JS runtime for the project to be able to build the artifacts
+            - name: Set up Node.JS
+              uses: actions/setup-node@v7
+              background: true
+              with:
+                  node-version: 24
+                  scope: elliot-labs
+
+            # Download the compiled artifact from the build job so that it can be published to the NPM global registry
+            - name: Download NPM Artifact
+              uses: actions/download-artifact@v8
+              background: true
+              with:
+                  name: NPM-Package
+
+            # Install the socket firewall binary to reduce the risk of install-time malware
+            - name: Install - Socket Firewall
+              uses: SocketDev/action@ba6de6cc0565af1f42295590380973573297e31f
+              background: true
+              with:
+                  mode: firewall-free
+
+            # Bring job back to sync execution by awaiting for all async jobs to finish before continuing
+            - name: Steps - Convert Back To Synchronous Execution - Environment Setup
+              wait-all: true
+
+            # Validate the attestation of the downloaded artifact to prevent tamper
+            - name: Validate Attestation
+              background: true
+              env:
+                  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              run: gh attestation verify ${{ needs.Build.outputs.packageName }} --repo elliot-labs/chat-engine --signer-workflow elliot-labs/chat-engine/.github/workflows/Build.yml@${{ github.event_name == 'release' && format('refs/tags/{0}', github.ref_name) || 'refs/heads/main' }}
+
+            # Update NPM to the latest version to support OIDC and provenance attestation
+            - name: Update - NPM
+              background: true
+              run: sfw npm install -g npm
+
+            # Bring job back to sync execution by awaiting for all async jobs to finish before continuing
+            - name: Steps - Convert Back To Synchronous Execution - Publish Prep
+              wait-all: true
+
+            # Upload the package to NPM with the correct tag using OIDC and Provenance attestation
+            - name: Upload Package to NPM Registry
+              run: |
+                  if [ "${{ github.event_name }}" = "release" ] && [ "${{ github.event.release.prerelease }}" = "true" ]; then
+                    npm publish ${{ needs.Build.outputs.packageName }} --tag=${{ needs.Initialize-Metadata.outputs.channel }} --ignore-scripts
+                  elif [ "${{ github.event_name }}" = "release" ]; then
+                    npm publish ${{ needs.Build.outputs.packageName }} --ignore-scripts
+                  fi

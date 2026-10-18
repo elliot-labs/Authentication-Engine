@@ -1,0 +1,15 @@
+# Source Code
+src/
+
+# TypeScript configs/metadata
+*tsconfig*
+**/*.tsbuildinfo
+
+# CI/CD
+.github
+eslint.config.js
+
+# IDE integration
+*.code-workspace
+.vscode
+.devcontainer

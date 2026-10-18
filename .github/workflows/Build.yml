@@ -1,0 +1,132 @@
+# Human friendly display name for this workflow
+name: Build - Production
+
+# Event listeners for when the job should start execution
+on:
+    # Allows you to run this workflow manually from the Actions tab
+    workflow_dispatch:
+
+    # Run the build checks on every change
+    push:
+        branches: [main]
+    pull_request:
+        branches: [main]
+
+    # Allow this workflow to be called from another workflow
+    workflow_call:
+        inputs:
+            correlationId:
+                description: "Allows jobs to identify the origin of the execution stack if doing cross-workflow calls."
+                type: string
+                required: false
+        outputs:
+            packageName:
+                description: "File name for the generated standalone NPM package."
+                value: ${{ jobs.build.outputs.packageName }}
+
+# Isolated execution environments to run steps in
+jobs:
+    # Collect and compute workflow specific information and metadata that will be used by downstream jobs.
+    Initialize-Metadata:
+        # Human friendly display name for this job
+        name: Initialize - Metadata
+
+        # Least permissions required for the job to run successfully
+        permissions:
+            contents: read
+
+        # Run the specified workflow
+        uses: ./.github/workflows/Metadata.yml
+
+    # Build the production artifacts for this project
+    build:
+        # Human friendly display name for this job
+        name: Build - Production
+
+        # Operating system to run the job on
+        runs-on: ubuntu-latest
+
+        # Least permissions required for the job to run successfully
+        permissions:
+            attestations: write
+            contents: read
+            id-token: write
+            packages: write
+
+        # Wait for the specified jobs to complete before starting this job
+        needs: [Initialize-Metadata]
+
+        # Content that can be reused across multiple workflows to avoid duplication of code and logic
+        outputs:
+            packageName: ${{ steps.generate-package.outputs.package-file }}
+
+        # Sequence of actions to take to accomplish the job
+        steps:
+            # Clone the repository to the runner so that it can be used in subsequent steps
+            - name: Checkout repository
+              uses: actions/checkout@v7
+              background: true
+
+            # Set up the Node.JS runtime for the project to be able to build the artifacts
+            - name: Set up Node.JS
+              uses: actions/setup-node@v7
+              background: true
+              with:
+                  node-version: 24
+                  scope: elliot-labs
+                  registry-url: https://npm.pkg.github.com/
+
+            # Install the socket firewall binary to reduce the risk of install-time malware
+            - name: Install - Socket Firewall
+              uses: SocketDev/action@ba6de6cc0565af1f42295590380973573297e31f
+              background: true
+              with:
+                  mode: firewall-free
+
+            # Convert execution back to sync execution
+            - name: Steps - Convert Back To Synchronous Execution - Environment Setup
+              wait-all: true
+
+            # Install the project dependencies needed to build the project
+            - name: Install dependencies
+              run: sfw npm ci
+
+            # Update the version of the project to include the channel and short SHA for non-stable releases to provide a unique identifier for the build artifacts so multiple versions can be published for a single nonstable version
+            - name: Tattoo Version
+              if: ${{ needs.Initialize-Metadata.outputs.channel != 'stable' }}
+              run: npm version --no-commit-hooks --no-git-tag-version "${{ needs.Initialize-Metadata.outputs.version }}-${{ needs.Initialize-Metadata.outputs.channel }}.${{ needs.Initialize-Metadata.outputs.shortSha }}"
+
+            # Transpile the project from TS to JS so that the content is executable
+            - name: Build Project
+              run: npm run build:Prod
+
+            # Upload the package to GitHub packages so that it can be used by other projects and workflows
+            - name: Upload - GitHub Packages
+              env:
+                  NODE_AUTH_TOKEN: ${{ github.token }}
+              run: npm publish --tag ${{ needs.Initialize-Metadata.outputs.channel }}
+
+            # Generate a standalone NPM package for the project that can be used in other workflows or downloaded for testing purposes
+            - name: Generate NPM Package
+              id: generate-package
+              run: echo "package-file=$(npm pack --ignore-scripts)" >> "$GITHUB_OUTPUT"
+
+            # Upload an attestation for the generated standard NPM package to provide a verifiable record of the build process and its integrity
+            - name: Attest NPM Package
+              uses: actions/attest@v4
+              background: true
+              with:
+                  subject-path: ${{ steps.generate-package.outputs.package-file }}
+
+            # Upload the generated NPM package as a build artifact so that it can be downloaded and used in other workflows or for testing purposes
+            - name: Upload a Build Artifact
+              uses: actions/upload-artifact@v7
+              background: true
+              with:
+                  name: NPM-Package
+                  if-no-files-found: error
+                  path: ${{ steps.generate-package.outputs.package-file }}
+
+            # Convert execution back to sync execution
+            - name: Steps - Convert Back To Synchronous Execution - Artifact Upload
+              wait-all: true

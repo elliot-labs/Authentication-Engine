@@ -1,0 +1,61 @@
+{
+    // Visit https://aka.ms/tsconfig to read more about this file
+    "compilerOptions": {
+        /* Language and output. */
+        "target": "es2025",
+        "incremental": true,
+        "declaration": true,
+        "rootDir": ".",
+        "outDir": "bin/",
+        /* Import & Export. */
+        "module": "node20",
+        "esModuleInterop": true,
+        "moduleResolution": "node16",
+        "forceConsistentCasingInFileNames": true,
+        "sourceMap": true,
+        "removeComments": true,
+        "resolveJsonModule": true,
+        "isolatedModules": true,
+        "allowJs": true,
+        "checkJs": true,
+        "skipLibCheck": true,
+        /* Security & quality. */
+        "strict": true,
+        "alwaysStrict": true,
+        "allowUnreachableCode": false,
+        "allowUnusedLabels": false,
+        "exactOptionalPropertyTypes": true,
+        "noFallthroughCasesInSwitch": true,
+        "noImplicitAny": true,
+        "noImplicitOverride": true,
+        "noImplicitReturns": true,
+        "noImplicitThis": true,
+        "noPropertyAccessFromIndexSignature": true,
+        "noUncheckedIndexedAccess": true,
+        "noUncheckedSideEffectImports": true,
+        "noUnusedLocals": true,
+        "noUnusedParameters": true,
+        "strictBindCallApply": true,
+        "strictBuiltinIteratorReturn": true,
+        "strictFunctionTypes": true,
+        "strictNullChecks": true,
+        "strictPropertyInitialization": true,
+        "useUnknownInCatchVariables": true,
+        "verbatimModuleSyntax": true,
+        /* Misc. */
+        "plugins": [
+            {
+                "transform": "typia/lib/transform",
+                "functional": true
+            }
+        ]
+    },
+    "include": [
+        "src/**/*",
+        "test/**/*"
+    ],
+    "exclude": [
+        "bin/**/*",
+        "node_modules/**/*"
+    ]
+}
