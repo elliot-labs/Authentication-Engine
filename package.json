@@ -1,6 +1,6 @@
 {
     "name": "@elliot-labs/authentication-engine",
-    "version": "1.0.3",
+    "version": "1.0.4",
     "main": "bin/src/index.js",
     "type": "module",
     "description": "Provides Entra ID authentication and authorization capabilities.",
