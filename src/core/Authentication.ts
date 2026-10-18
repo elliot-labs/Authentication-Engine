@@ -148,11 +148,11 @@ export class AuthenticationEngine {
         /** Tenant ID to be used for validation. If the NULL UUID is provided, the tenant ID from the access token will be used. */
         const computedTenantIdList = tenantIdList.length === 0 ? [tokenTenantId] : tenantIdList;
 
-        /** Flag that indicates whether the tenant has been successfully validated. */
-        let tenantValidated = false;
+        /** Flag that indicates whether the cryptographic validation has been successfully completed. */
+        let cryptoValidated = false;
 
         // Iterate through each tenant and ensure that the token is valid for at least one of them
-        for (const requestedTenant of computedTenantIdList) {
+        tenantList: for (const requestedTenant of computedTenantIdList) {
             /**
              * OpenID configuration for the tenant ID specified in the access token.
              * If a tenant ID is provided to in the function parameters, uses that one instead and ignores the token's tenant ID.
@@ -164,7 +164,7 @@ export class AuthenticationEngine {
             try { openIdConfig = await this.#getTenantConfig(requestedTenant, tokenComponents.payload.ver === '2.0' ? '2.0' : '1.0'); } catch (_error) { continue; }
 
             // If the OpenID configuration cannot be retrieved for the tenant specified in the token, it is not valid as we cannot validate the issuer or retrieve signing keys to validate the signature
-            if (!openIdConfig) { return false; }
+            if (!openIdConfig) { continue; }
 
             // If the Microsoft provided issuer doesn't match the token provided issuer, the token is not valid
             if (tokenComponents.payload.iss !== openIdConfig.issuer) { continue; }
@@ -181,18 +181,27 @@ export class AuthenticationEngine {
                 const selectedKey = signingKeyList.keys.find((publicKey) => publicKey.kid === tokenComponents.header.kid);
 
                 // If no key can be found that matches the key ID in the token header, the token is not valid as we cannot verify the signature without the correct key
-                if (!selectedKey) { return false; }
+                if (!selectedKey) { continue; }
 
                 /** PEM-encoded certificate for the selected key which will be used to verify the token's signature. */
                 const pemEncodedCertificate = `-----BEGIN CERTIFICATE-----\n${ selectedKey.x5c[0] }\n-----END CERTIFICATE-----`;
 
                 // If the signature cryptographically verifies successfully, then it is a Microsoft signed access token
-                try { if (verify(accessToken, 'RS256', pemEncodedCertificate)) { tenantValidated = true; } } catch (_error) { continue; }
+                try {
+                    // Check if the token is able to be cryptographically verified with the selected key
+                    if (verify(accessToken, 'RS256', pemEncodedCertificate)) {
+                        // Mark the tenant as validated since the token's signature is verified successfully.
+                        cryptoValidated = true;
+
+                        // Stop the outer loop if a match is made
+                        break tenantList;
+                    }
+                } catch (_error) { continue; }
             }
         }
 
-        // If the tenant was not validated, return false to indicate the token is not validated
-        if (!tenantValidated) { return false; }
+        // If the signature was not validated, return false to indicate the token is not validated
+        if (!cryptoValidated) { return false; }
 
         // #endregion Cryptographic Validation
 
