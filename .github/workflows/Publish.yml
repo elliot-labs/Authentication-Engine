@@ -89,7 +89,7 @@ jobs:
               background: true
               env:
                   GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-              run: gh attestation verify ${{ needs.Build.outputs.packageName }} --repo elliot-labs/chat-engine --signer-workflow elliot-labs/chat-engine/.github/workflows/Build.yml@${{ github.event_name == 'release' && format('refs/tags/{0}', github.ref_name) || 'refs/heads/main' }}
+              run: gh attestation verify ${{ needs.Build.outputs.packageName }} --repo elliot-labs/Authentication-Engine --signer-workflow elliot-labs/Authentication-Engine/.github/workflows/Build.yml@${{ github.event_name == 'release' && format('refs/tags/{0}', github.ref_name) || 'refs/heads/main' }}
 
             # Update NPM to the latest version to support OIDC and provenance attestation
             - name: Update - NPM
