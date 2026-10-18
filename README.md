@@ -1,6 +1,6 @@
 # Authentication Engine
 
-![NPM Version](https://img.shields.io/npm/v/%40elliot-labs%2Fauthentication-engine) ![NPM License](https://img.shields.io/npm/l/%40elliot-labs%2Fauthentication-engine)
+[![NPM Version](https://img.shields.io/npm/v/%40elliot-labs%2Fauthentication-engine?style=flat-square)](https://www.npmjs.com/package/@elliot-labs/authentication-engine) [![NPM License](https://img.shields.io/npm/l/%40elliot-labs%2Fauthentication-engine?style=flat-square)](https://github.com/elliot-labs/Authentication-Engine/blob/main/LICENSE)
 
 Microsoft Entra ID authentication and authorization utilities for TypeScript services and Express APIs.
 
