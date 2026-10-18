@@ -1,10 +1,10 @@
 /* eslint-disable no-continue */
-import type { AccessTokenV1Claims, AccessTokenV2Claims, AuthorizationData, JwksKeySet, OpenIdConfiguration } from '../utility/types/core/Authentication.js';
+import type { AccessTokenV1Claims, AccessTokenV2Claims, AuthorizationData, JwksKeySet, OpenIdConfiguration } from './utility/types/Authentication.js';
 import { assertGuard, assertGuardEquals, is, type tags } from 'typia';
 import { decode, verify } from 'jws';
 import { DefaultAzureCredential } from '@azure/identity';
-import { NULL_UUID } from '../utility/constants/core.js';
-import type { Uuid } from '../utility/types/constant/typia.js';
+import { NULL_UUID } from './utility/constants/core.js';
+import type { Uuid } from './utility/types/constant/typia.js';
 
 /** Engine responsible for managing and validating authentication with Entra ID. */
 export class AuthenticationEngine {
@@ -235,9 +235,24 @@ export class AuthenticationEngine {
     }
 
     /**
-     * Extracts and processes the authorization data from the provided access token.
-     * @param accessToken Access token to extract the claims from.
-     * @returns Processed authorization data for easy consumption within the app.
+     * Decodes a Microsoft Entra access token and returns normalized authorization data for use by application authorization policies.
+     *
+     * Application roles from the `roles` claim and delegated scopes from the `scp` claim are combined into a deduplicated `permissionList`. Microsoft Entra directory roles from `wids`, the object ID from `oid`, the subject ID from `sub`, and the tenant ID extracted from `iss` are also returned.
+     *
+     * This method does not validate the token's signature, issuer metadata, audience, permitted tenant, or validity window. Call `confirmAccessToken()` before this method whenever the extracted claims will be used to make an access-control decision.
+     * @example
+     * const isValid = await authEngine.confirmAccessToken(accessToken, [clientId], [tenantId]);
+     *
+     * if (!isValid) { throw new Error('Access-token validation failed.'); }
+     *
+     * const authorization = authEngine.getAccessTokenAuthzData(accessToken);
+     *
+     * if (!authorization.permissionList.includes('CheckIn.Read')) { throw new Error('The authenticated principal does not have CheckIn.Read.'); }
+     * @param accessToken Encoded Microsoft Entra access token from which authorization claims will be extracted.
+     * @returns Normalized application permissions, delegated scopes, directory roles, and principal identifiers from the token.
+     * @throws {TypeError} Thrown when the supplied value is not a decodable JWT, does not contain the expected Microsoft Entra access-token claims, or contains an issuer from which a valid tenant UUID cannot be extracted.
+     * @remarks Decoding is not authentication. Never trust the returned authorization data unless the token has already passed cryptographic and claims validation.
+     * @see confirmAccessToken
      */
     public getAccessTokenAuthzData(accessToken: string): AuthorizationData {
         // #region Input Validation

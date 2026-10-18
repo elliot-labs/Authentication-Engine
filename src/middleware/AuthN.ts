@@ -1,7 +1,7 @@
 import type { NextFunction, Request, Response } from 'express';
 import { assertGuardEquals, type tags } from 'typia';
 import { AuthenticationEngine } from '../Authentication.js';
-import type { Uuid } from '../../utility/types/constant/typia.js';
+import type { Uuid } from '../utility/types/constant/typia.js';
 
 /** Instance of the authentication engine used for validating tokens. */
 const authEngine = AuthenticationEngine.getInstance();
