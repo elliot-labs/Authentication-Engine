@@ -337,6 +337,53 @@ export class AuthenticationEngine {
         return this.#findTenantIdFromIssuer(config.issuer);
     }
 
+    /**
+     * Checks if token validation is operational.
+     * @param token Access token to attempt validation on.
+     * @param appId Application (Client) ID of the access token that is to be validated.
+     * @returns Flag that indicates if access token validation is working (`true`) or not (`false`).
+     */
+    public async healthCheckTokenValidation(token: string, appId: string & tags.Format<'uuid'>): Promise<boolean> {
+        // #region Input Validation
+        assertGuardEquals(token);
+
+        assertGuardEquals(appId);
+        // #endregion Input Validation
+
+        // Ensure that crashes don't crash the health check, any crash detected should be an unsuccessful health check.
+        try {
+            // Return the success state of the token validation to the caller app, if token validates, token validation is working!
+            return await this.confirmAccessToken(token, [appId], []);
+        } catch (_error) {
+            // On any error, client token validation is not working
+            return false;
+        }
+    }
+
+    /**
+     * Checks if tokens can be issued by the built in Entra ID credential.
+     * This is useful for systems that support health checking like Azure App Service.
+     * @param appId Application (Client) ID used in token retrieval. The token will be issued against this audience. Defaults to the graph API.
+     * @returns Flag that indicates if token issuance is working (`true`) or not (`false`).
+     */
+    public async healthCheckTokenIssuance(appId?: string & tags.Format<'uuid'>): Promise<boolean> {
+        // #region Input Validation
+        assertGuardEquals(appId);
+        // #endregion Input Validation
+
+        // Ensure that the health check process doesn't crash.
+        try {
+            // Attempt to get an access token from the specified endpoint.
+            await this.entra.getToken(`${ appId ?? '00000003-0000-0000-c000-000000000000' }/.default`);
+
+            // If the retrieval process doesn't crash, token issuance is working!
+            return true;
+        } catch (_error) {
+            // Any error encountered indicates token issuance is not working.
+            return false;
+        }
+    }
+
     /*
      * Helper Functions
      */
